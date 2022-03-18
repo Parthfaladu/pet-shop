@@ -1,5 +1,14 @@
 import colors from 'vuetify/es5/util/colors'
 
+const endpointDefaults = {
+  // withCredentials: true,
+  headers: {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+}
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -18,7 +27,9 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: [
+    '~/assets/css/main.scss'
+  ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -35,7 +46,13 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: [],
+  modules: [
+    // Doc: https://github.com/nuxt-community/dotenv-module
+    '@nuxtjs/dotenv',
+    '@nuxtjs/axios',
+    // Doc: https://auth.nuxtjs.org/guide
+    '@nuxtjs/auth-next',
+  ],
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -53,7 +70,9 @@ export default {
           success: colors.green.accent3,
         },
         light: {
-          green400: '#4EC690'
+          'primary-green': '#4EC690',
+          'secondary-green': '#EEF5F2',
+          'primary-blue': '#1976D2'
         }
       },
     },
@@ -65,6 +84,49 @@ export default {
     },
   },
 
+  auth: {
+    redirect: false,
+    strategies: {
+      local: {
+        token: {
+          property: 'data.token',
+          global: true,
+          type: 'Bearer',
+          maxAge: 604800,
+        },
+        user: {
+          property: false,
+          autoFetch: true,
+        },
+        endpoints: {
+          login: {
+            ...endpointDefaults,
+            url: `${process.env.BACKEND_BASE_URL}/user/login`,
+            ...{
+              'Access-Control-Allow-Credentials': true,
+            },
+            method: 'post',
+            propertyName: 'data.token',
+          },
+          logout: {
+            ...endpointDefaults,
+            url: `${process.env.BACKEND_BASE_URL}/user/logout`,
+            method: 'get',
+          },
+          user: {
+            ...endpointDefaults,
+            url: `${process.env.BACKEND_BASE_URL}/user`,
+            method: 'get',
+          },
+        },
+      },
+    },
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    transpile:
+      [
+        'vee-validate/dist/rules',
+      ]
+  },
 }
