@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <nav class="py-4 primary-green rounded">
+      <nav class="py-4 primary-green rounded main-header">
         <v-container>
           <div class="d-flex justify-space-between">
             <nuxt-link to="/" class="d-flex text-decoration-none">
@@ -70,16 +70,39 @@
                 </v-icon>
                 <span class="d-none d-lg-flex">CART(0)</span>
               </v-btn>
+              <div v-if="!$store.state.auth.loggedIn">
                 <v-btn
                   outlined
                   color="white primary-green--text"
                   class="rounded"
+                  @click.stop="isOpenLoginForm = true"
                 >
                   <v-icon left class="mr-0 mr-lg-2 ml-0 -ml-lg-1">
                     mdi-account
                   </v-icon>
                   <span class="d-none d-lg-flex">LOGIN</span>
                 </v-btn>
+              </div>
+              <div v-else>
+                <v-btn
+                  outlined
+                  color="white primary-green--text"
+                  class="rounded"
+                  @click.stop="logout"
+                >
+                  <v-icon left class="mr-0 mr-lg-2 ml-0 -ml-lg-1">
+                    mdi-logout
+                  </v-icon>
+                  <span class="d-none d-lg-flex logout-btn">LOGOUT</span>
+                </v-btn>
+              </div>
+              <div
+                v-if="$store.state.auth.loggedIn"
+                class="avatar"
+                @click="isOpenUserSetting = true"
+              >
+                <img src="@/assets/images/avatar.png" class="w-100" />
+              </div>
             </div>
             <div class="d-flex d-lg-none">
               <v-btn @click="isOpenMenu = true">
@@ -111,19 +134,50 @@
         </v-list>
       </div>
     </transition>
+    <user-login v-show="isOpenLoginForm" />
+    <user-sign-up />
+    <user-setting v-if="$store.state.auth.loggedIn" />
   </div>
 </template>
 <script>
+import UserLogin from '~/components/Form/UserLogin.vue'
+import UserSignUp from '~/components/Form/UserSignUp.vue'
+import UserSetting from '~/components/UserSetting.vue'
+
 export default {
+  components: { UserLogin, UserSignUp, UserSetting },
   name: 'AppHeader',
   data() {
     return {
       isOpenMenu: false,
     }
   },
+  computed: {
+    isOpenUserSetting: {
+      get() {
+        return this.$store.getters['authUser/getIsOpenUserSetting']
+      },
+      set(value) {
+        this.$store.commit('authUser/SET_IS_OPEN_USER_SETTING', value)
+      },
+    },
+    isOpenLoginForm: {
+      get() {
+        return this.$store.getters['authUser/getIsOpenLoginForm']
+      },
+      set(value) {
+        this.$store.commit('authUser/SET_IS_OPEN_LOGIN_FORM', value)
+      },
+    },
+  },
   methods: {
     closeMenu() {
       this.isOpenMenu = false
+    },
+    async logout() {
+      await this.$auth.logout()
+      // HACK - sometime nuxt auth package not updating state so refreshing page
+      this.$router.go()
     },
   },
 }

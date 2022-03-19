@@ -73,7 +73,7 @@ export const mutations = {
 export const actions = {
   async GetProducts({ state, commit }, params) {
     try {
-      const res = await getProducts({ page: state.page, limit: state.limit, sortBy: 'price', desc: state.sort, category: state.currentCategoryUid, brand: state.selectedBrand, price: state.price, title: state.title })
+      const res = await getProducts({ page: state.page, limit: state.limit, sortBy: state.sortBy, desc: state.sort, category: state.currentCategoryUid, brand: state.selectedBrand, price: state.price, title: state.title })
       commit('SET_PRODUCTS', res.data)
     } catch (err) { }
   },
